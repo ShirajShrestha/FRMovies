@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useCallback, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
 import {
@@ -42,6 +42,25 @@ const MovieDetails = () => {
         dispatch(fetchReviews(data.results));
       });
   }, [dispatch, id]);
+
+  const handleSubmit = useCallback(async () => {
+    const value = document.getElementById("Rating").value;
+    const response = await fetch(
+      `https://api.themoviedb.org/3/movie/${id}/rating`,
+      {
+        method: "POST",
+        headers: {
+          accept: "application/json",
+          "Content-Type": "application/json;charset=utf-8",
+          Authorization: `Bearer ${import.meta.env.VITE_ACCESS_TOKEN}`,
+        },
+        // body: '{"value":8.5}',
+        body: `{"value": ${value}}`,
+      }
+    );
+    const data = await response.json();
+    console.log(data);
+  }, [id]);
 
   const getAvatar = (authorDetails) => {
     if (authorDetails.avatar_path) {
@@ -120,6 +139,35 @@ const MovieDetails = () => {
               {movie.genres?.map((genre) => genre.name).join(", ")}
             </p>
           </div>
+        </div>
+
+        {/* Rating the movie */}
+        <div className="mt-8 p-4 bg-gray-900 text-white rounded-lg shadow-md flex justify-between ">
+          <div className="flex gap-4">
+            <h3 className="text-xl font-semibold mb-2">Rate this movie:</h3>
+            <select
+              name="ratings"
+              id="Rating"
+              className="text-black px-2 rounded-lg"
+            >
+              <option value="1">1</option>
+              <option value="2">2</option>
+              <option value="3">3</option>
+              <option value="4">4</option>
+              <option value="5">5</option>
+              <option value="6">6</option>
+              <option value="7">7</option>
+              <option value="8">8</option>
+              <option value="9">9</option>
+              <option value="10">10</option>
+            </select>
+          </div>
+          <button
+            className="bg-yellow-500 p-2 rounded text-black"
+            onClick={handleSubmit}
+          >
+            Submit
+          </button>
         </div>
 
         {/* reviews */}
