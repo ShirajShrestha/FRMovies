@@ -1,8 +1,14 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 const Movielist = () => {
+  const navigate = useNavigate();
   const [movies, setMovies] = useState([]);
   const [value, setValue] = useState("now_playing");
+
+  const showMovieDetails = (id) => {
+    navigate(`/movies/${id}`);
+  };
 
   const handlechange = (e) => {
     setValue(e.target.value);
@@ -44,6 +50,7 @@ const Movielist = () => {
             <div
               key={movie.id}
               className="bg-gray-800 rounded-lg shadow-md overflow-hidden transform transition duration-500 hover:scale-105 hover:bg-gray-700"
+              onClick={() => showMovieDetails(movie.id)}
             >
               <div className="relative overflow-hidden">
                 <img
