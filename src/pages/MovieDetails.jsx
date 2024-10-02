@@ -1,11 +1,19 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
+import {
+  fetchMovieDetail,
+  fetchReviews,
+  setMovieDetail,
+  setReviews,
+} from "../redux/movieDetailSlice";
 
 const MovieDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const [movie, setMovie] = useState("");
-  const [reviews, setReviews] = useState([]);
+  const dispatch = useDispatch();
+  const movie = useSelector(setMovieDetail);
+  const reviews = useSelector(setReviews);
 
   useEffect(() => {
     fetch(
@@ -17,10 +25,9 @@ const MovieDetails = () => {
         return res.json();
       })
       .then((data) => {
-        console.log(data);
-        setMovie(data);
+        dispatch(fetchMovieDetail(data));
       });
-  }, [id]);
+  }, [dispatch, id]);
 
   useEffect(() => {
     fetch(
@@ -32,10 +39,9 @@ const MovieDetails = () => {
         return res.json();
       })
       .then((data) => {
-        console.log(data.results);
-        setReviews(data.results);
+        dispatch(fetchReviews(data.results));
       });
-  }, [id]);
+  }, [dispatch, id]);
 
   const getAvatar = (authorDetails) => {
     if (authorDetails.avatar_path) {

@@ -14,6 +14,8 @@ const movieSlice = createSlice({
   },
 });
 
+export default movieSlice.reducer;
 export const { fetchMovie } = movieSlice.actions;
 export const setMovies = (state) => state.movies.movies;
-export default movieSlice.reducer;
+export const singleMovie = (state, movieId) =>
+  state.movies.movies.find((movie) => movie.id === parseInt(movieId));
