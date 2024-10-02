@@ -1,9 +1,12 @@
 import { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import { fetchMovie, setMovies } from "../redux/movieSlice";
 
 const Movielist = () => {
   const navigate = useNavigate();
-  const [movies, setMovies] = useState([]);
+  const dispatch = useDispatch();
+  const movies = useSelector(setMovies);
   const [value, setValue] = useState("now_playing");
 
   const showMovieDetails = (id) => {
@@ -24,9 +27,10 @@ const Movielist = () => {
         return res.json();
       })
       .then((data) => {
-        setMovies(data.results);
+        // setAllMovies(data.results);
+        dispatch(fetchMovie(data.results));
       });
-  }, [value]);
+  }, [dispatch, value]);
 
   return (
     <>
