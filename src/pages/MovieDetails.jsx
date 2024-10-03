@@ -1,7 +1,8 @@
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
 import {
+  addReview,
   fetchMovieDetail,
   fetchReviews,
   setMovieDetail,
@@ -14,6 +15,70 @@ const MovieDetails = () => {
   const dispatch = useDispatch();
   const movie = useSelector(setMovieDetail);
   const reviews = useSelector(setReviews);
+
+  const [newReview, setNewReview] = useState({
+    author: "",
+    author_details: {
+      name: "",
+      username: "",
+      rating: "",
+    },
+    content: "",
+    created_at: "",
+    id: "",
+  });
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+
+    if (name === "author") {
+      setNewReview((data) => ({
+        ...data,
+        author: value,
+        author_details: {
+          ...data.author_details,
+          name: value,
+        },
+      }));
+    } else if (name === "content") {
+      setNewReview((data) => ({
+        ...data,
+        content: value,
+      }));
+    } else if (name === "rating" || name === "username") {
+      setNewReview((data) => ({
+        ...data,
+        author_details: {
+          ...data.author_details,
+          [name]: value,
+        },
+      }));
+    }
+  };
+
+  const handleNewReview = (e) => {
+    e.preventDefault();
+    const updatedReview = {
+      ...newReview,
+      created_at: new Date().toISOString(),
+      id: Date.now().toString(),
+    };
+    console.log(updatedReview);
+    dispatch(addReview(updatedReview));
+
+    // Clear the form
+    setNewReview({
+      author: "",
+      author_details: {
+        name: "",
+        username: "",
+        rating: "",
+      },
+      content: "",
+      created_at: "",
+      id: "",
+    });
+  };
 
   useEffect(() => {
     fetch(
@@ -138,6 +203,23 @@ const MovieDetails = () => {
               <strong>Genres:</strong>{" "}
               {movie.genres?.map((genre) => genre.name).join(", ")}
             </p>
+            <p className="text-gray-400">
+              <strong>Status:</strong> {movie.status}
+            </p>
+            <p className="text-gray-400 flex text-lg">
+              <strong>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="currentColor"
+                  viewBox="0 0 24 24"
+                  stroke="none"
+                  className="w-6 h-6"
+                >
+                  <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
+                </svg>
+              </strong>
+              : {movie.vote_average}
+            </p>
           </div>
         </div>
 
@@ -170,26 +252,8 @@ const MovieDetails = () => {
           </button>
         </div>
 
-        {/* reviews */}
-        {/* <div className="mt-8 p-4 bg-gray-800 text-white rounded-lg shadow-md">
-          <h3 className="text-2xl font-semibold mb-4">Reviews</h3>
+        {/* Reviews */}
 
-          {reviews.length > 0 ? (
-            <div className="space-y-4">
-              {reviews.map((review) => (
-                <div key={review.id} className="border-b border-gray-700 pb-4">
-                  <p className="text-sm text-gray-400">
-                    <strong>{review.author}</strong> —{" "}
-                    {new Date(review.created_at).toLocaleDateString()}
-                  </p>
-                  <p className="mt-2 text-gray-300">{review.content}</p>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <p className="text-gray-400">No reviews available.</p>
-          )}
-        </div> */}
         <div className="mt-8 p-4 bg-gray-800 text-white rounded-lg shadow-md">
           <h3 className="text-2xl font-semibold mb-4">Reviews</h3>
 
@@ -231,6 +295,58 @@ const MovieDetails = () => {
             <p className="text-gray-400">No reviews available.</p>
           )}
         </div>
+
+        {/* Review from */}
+        <form
+          className="mt-8 p-4 bg-gray-900 text-white rounded-lg shadow-md "
+          onSubmit={handleNewReview}
+        >
+          <h3 className="text-xl font-semibold mb-4 ">Leave a review</h3>
+          <div className="flex flex-col  text-gray-100 space-y-4 lg:mx-20 lg:mr-40 md:mx-10 sm:mx-5">
+            <input
+              type="text"
+              name="author"
+              value={newReview.author}
+              placeholder="Enter your name"
+              className="px-2 py-2 rounded-md bg-gray-800"
+              onChange={handleChange}
+            />
+            <input
+              type="text"
+              name="username"
+              value={newReview.author_details.username}
+              onChange={handleChange}
+              placeholder="Enter your username"
+              className="px-2 py-2 rounded-md bg-gray-800"
+            />
+            <textarea
+              name="content"
+              value={newReview.content}
+              rows={6}
+              placeholder="Write a comment"
+              className="px-2 py-2 rounded-md resize-none bg-gray-800"
+              onChange={handleChange}
+            ></textarea>
+            <input
+              type="number"
+              name="rating"
+              value={newReview.author_details.rating}
+              placeholder="Rate this movie (0 - 10)"
+              min={0}
+              max={10}
+              className="px-2 py-2 rounded-md bg-gray-800"
+              onChange={handleChange}
+            />
+            <span>
+              <button
+                type="submit"
+                className="mb-4 bg-blue-500 text-white px-4 py-2 rounded"
+              >
+                Send
+              </button>
+            </span>
+          </div>
+        </form>
       </div>
     </div>
   );
