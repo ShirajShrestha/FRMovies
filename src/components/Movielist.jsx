@@ -1,13 +1,15 @@
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { fetchMovie, setMovies } from "../redux/movieSlice";
+import { fetchMovie, fetchNextMovie, setMovies } from "../redux/movieSlice";
 
 const Movielist = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const movies = useSelector(setMovies);
   const [value, setValue] = useState("now_playing");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [isFetching, setIsFetching] = useState(false);
 
   const showMovieDetails = (id) => {
     navigate(`/movies/${id}`);
@@ -15,11 +17,13 @@ const Movielist = () => {
 
   const handlechange = (e) => {
     setValue(e.target.value);
+    setCurrentPage(1);
   };
 
   useEffect(() => {
+    setIsFetching(true);
     fetch(
-      `https://api.themoviedb.org/3/movie/${value}?language=en-US&page=1&api_key=${
+      `https://api.themoviedb.org/3/movie/${value}?language=en-US&page=${currentPage}&api_key=${
         import.meta.env.VITE_API_KEY
       }`
     )
@@ -27,10 +31,31 @@ const Movielist = () => {
         return res.json();
       })
       .then((data) => {
-        // setAllMovies(data.results);
-        dispatch(fetchMovie(data.results));
+        if (currentPage === 1) {
+          dispatch(fetchMovie(data.results));
+        } else {
+          console.log(data.results);
+          dispatch(fetchNextMovie(data.results));
+        }
+        setIsFetching(false);
       });
-  }, [dispatch, value]);
+  }, [dispatch, value, currentPage]);
+
+  const handleScroll = () => {
+    const scrollY = window.scrollY;
+    const windowHeight = window.innerHeight;
+    const documentHeight = document.documentElement.scrollHeight;
+    if (scrollY + windowHeight >= documentHeight - 100 && !isFetching) {
+      setCurrentPage((prevPage) => prevPage + 1);
+    }
+  };
+
+  useEffect(() => {
+    window.addEventListener("scroll", handleScroll);
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, [isFetching]);
 
   return (
     <>
@@ -39,7 +64,7 @@ const Movielist = () => {
         <select
           name=""
           onChange={handlechange}
-          className="border border-black rounded-lg px-4"
+          className="border border-black rounded-lg px-4 cursor-pointer"
         >
           <option value="now_playing">Now Playing</option>
           <option value="popular">Popular</option>
@@ -53,7 +78,7 @@ const Movielist = () => {
           {movies.map((movie) => (
             <div
               key={movie.id}
-              className="bg-gray-800 rounded-lg shadow-md overflow-hidden transform transition duration-500 hover:scale-105 hover:bg-gray-700"
+              className="bg-gray-800 rounded-lg shadow-md overflow-hidden transform transition duration-500 hover:scale-105 hover:bg-gray-700 cursor-pointer"
               onClick={() => showMovieDetails(movie.id)}
             >
               <div className="relative overflow-hidden">
@@ -70,7 +95,6 @@ const Movielist = () => {
                 <p className="text-sm text-gray-300">
                   Rating: {Math.round(movie.vote_average * 10) / 10}
                 </p>
-                {/* <p className="text-sm text-gray-300">Genre: {movie.genre}</p> */}
               </div>
             </div>
           ))}

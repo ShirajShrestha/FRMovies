@@ -11,11 +11,14 @@ const movieSlice = createSlice({
     fetchMovie: (state, actions) => {
       state.movies = actions.payload;
     },
+    fetchNextMovie: (state, action) => {
+      state.movies = [...state.movies, ...action.payload];
+    },
   },
 });
 
 export default movieSlice.reducer;
-export const { fetchMovie } = movieSlice.actions;
+export const { fetchMovie, fetchNextMovie } = movieSlice.actions;
 export const setMovies = (state) => state.movies.movies;
 export const singleMovie = (state, movieId) =>
   state.movies.movies.find((movie) => movie.id === parseInt(movieId));
